@@ -3,9 +3,9 @@ from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
-app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'gfIIb100%s'
 app.config['MYSQL_DB'] = 'racegame'
 
 mysql = MySQL(app)
@@ -79,32 +79,29 @@ def login():
     if len(user) < 1 :
         return "user name not found"
     elif password != user[0][2]:
-        return "false password"
+        return "incorrect password"
     else:
         return "login success"
 
-tracker_1_ip = ["192.168.1.1"]
-tracker_2_ip = ["198.168.1.2"]
+tracker = ["178.79.133.165", "109.74.206.118"]
 @app.route('/create_game' , methods=["POST"])
 def create_game():
     cur = mysql.connection.cursor()
     game_name = request.form['game_name']
+    num_players = request.form['num_players']
 
-    if len(get_record_by_column_value("game", "game_name", game_name)) > 0:
-        return "game name already exist"
-    else:
-        cur.execute(f"INSERT INTO game (game_name,tracker_1_ip,tracker_2_ip) VALUES ('{game_name}','{tracker_1_ip[0]}','{tracker_2_ip[0]}')")
-        # Commit the changes to the database
-        mysql.connection.commit()
+    cur.execute(f"INSERT INTO game (game_name,num_players, tracker_1_ip,tracker_2_ip, done) VALUES ('{game_name}',{num_players},'{tracker[0]}','{tracker[1]}', 0)")
+    # Commit the changes to the database
+    mysql.connection.commit()
 
-        # Close the cursor
-        cur.close()
-        return "user added"
+    # Close the cursor
+    cur.close()
+    return mysql.connection.insert_id()
 
-@app.route('/list_games' , methods=["POST"])
+@app.route('/list_games' , methods=["GET"])
 def list_games():
     cur = mysql.connection.cursor()
-    query = f"SELECT * FROM game "
+    query = f"SELECT * FROM game WHERE done = 0"
     cur.execute(query)
     records = cur.fetchall()
     print(records)
@@ -118,6 +115,22 @@ def list_games():
     # Close the cursor and database connection
     cur.close()
     return jsonify(json_response)
+
+@app.route('/list_tracker_games', methods=["POST"])
+def list_tracker_games():
+    cur = mysql.connection.cursor()
+    ip = request.form['ip']
+    query = f"SELECT * FROM game WHERE tracker_1_ip = '{ip}' OR tracker_2_ip = '{ip}'"
+    cur.execute(query)
+    records = curr.fetchall()
+    json_response = []
+    for record in records:
+        temp = []
+        for value in record
+            temp.append(value)
+        json_response.append(temp)
+    cur.close()
+    return jsonify(json_response)
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
 

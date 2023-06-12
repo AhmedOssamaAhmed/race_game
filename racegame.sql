@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 28, 2023 at 10:08 PM
--- Server version: 10.4.20-MariaDB
--- PHP Version: 7.4.22
+-- Host: localhost
+-- Generation Time: Jun 12, 2023 at 03:41 PM
+-- Server version: 10.4.27-MariaDB
+-- PHP Version: 8.1.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,14 +32,7 @@ CREATE TABLE `game` (
   `game_name` varchar(20) NOT NULL,
   `tracker_1_ip` varchar(20) NOT NULL,
   `tracker_2_ip` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `game`
---
-
-INSERT INTO `game` (`id`, `game_name`, `tracker_1_ip`, `tracker_2_ip`) VALUES
-(5, 'game1', '192.168.1.1', '198.168.1.2');
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -51,17 +44,7 @@ CREATE TABLE `user` (
   `id` int(11) NOT NULL,
   `user_name` varchar(20) NOT NULL,
   `password` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`id`, `user_name`, `password`) VALUES
-(1, 'osos', ''),
-(3, 'osos2001', '123455'),
-(4, 'osos2009', '000000'),
-(6, 'osos2003', '000000');
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Indexes for dumped tables
