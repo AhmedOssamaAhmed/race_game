@@ -1,5 +1,7 @@
 from flask import Flask, request, url_for,jsonify
 from flask_mysqldb import MySQL
+from threading import Thread
+import zmq
 
 app = Flask(__name__)
 
@@ -83,6 +85,18 @@ def login():
     else:
         return "login success"
 
+def notify_trackers(game_id, trackers):
+    context = zmq.Context()
+    s = context.socket(zmq.PUSH)
+    s.connect("tcp://%s:8787" % tracker[0])
+    s.send_string("%s %s SG %s" % (game_id, 0, tracker[1]))
+    s.close()
+
+    s2 = context.socket(zmq.PUSH)
+    s2.connect("tcp://%s:8787" % tracker[1])
+    s2.send_string("%s %s SG %s" % (game_id, 0, tracker[0]))
+    s2.close()
+
 tracker = ["178.79.133.165", "109.74.206.118"]
 @app.route('/create_game' , methods=["POST"])
 def create_game():
@@ -94,9 +108,14 @@ def create_game():
     # Commit the changes to the database
     mysql.connection.commit()
 
+    game_id = cur.lastrowid 
     # Close the cursor
     cur.close()
-    return mysql.connection.insert_id()
+    print(game_id)
+
+    Thread(target=notify_trackers, args=(game_id, tracker)).start()
+
+    return jsonify([game_id, tracker])
 
 @app.route('/list_games' , methods=["GET"])
 def list_games():
@@ -120,17 +139,27 @@ def list_games():
 def list_tracker_games():
     cur = mysql.connection.cursor()
     ip = request.form['ip']
-    query = f"SELECT * FROM game WHERE tracker_1_ip = '{ip}' OR tracker_2_ip = '{ip}'"
+    query = f"SELECT * FROM game WHERE (tracker_1_ip = '{ip}' OR tracker_2_ip = '{ip}') AND done = 0"
     cur.execute(query)
-    records = curr.fetchall()
+    records = cur.fetchall()
     json_response = []
     for record in records:
         temp = []
-        for value in record
+        for value in record:
             temp.append(value)
         json_response.append(temp)
     cur.close()
     return jsonify(json_response)
+
+@app.route('/done', methods=["POST"]):
+def done():
+    cur = mysql.connection.cursor()
+    game_id = request.form['game_id']
+    query = f"UPDATE game SET done = 1 WHERE id = {game_id};"
+    cur.execute(query)
+    return "OK" 
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
 
