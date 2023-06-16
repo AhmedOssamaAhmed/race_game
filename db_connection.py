@@ -151,12 +151,13 @@ def list_tracker_games():
     cur.close()
     return jsonify(json_response)
 
-@app.route('/done', methods=["POST"]):
+@app.route('/done', methods=["POST"])
 def done():
     cur = mysql.connection.cursor()
     game_id = request.form['game_id']
     query = f"UPDATE game SET done = 1 WHERE id = {game_id};"
     cur.execute(query)
+    mysql.connection.commit()
     return "OK" 
 
 
